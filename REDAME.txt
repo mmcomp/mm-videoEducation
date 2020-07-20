@@ -1,0 +1,3 @@
+Installation
+
+Copy woocommerce.zip to the enabled Theme folder and extract it
