@@ -538,8 +538,6 @@ function mm_add_video_class() {
 	];
 	$fromDate = mm_jalali_to_geregorian($_REQUEST['from-date']);
 	$toDate = mm_jalali_to_geregorian($_REQUEST['to-date']);
-	// echo "From : $fromDate\n";
-	// echo "To : $toDate\n";
 	if(strtotime($toDate)<strtotime($fromDate)) {
 		die(json_encode($out, true));
 	}
@@ -547,9 +545,7 @@ function mm_add_video_class() {
 	$vs = new VideoSession();
 	$selectedDates = [];
 	while(strtotime($currentDate)<=strtotime($toDate)) {
-		// echo $currentDate . " ";
 		$dayOfWeek = strtolower(date("l", strtotime($currentDate)));
-		// echo $dayOfWeek . "\n";
 		if(in_array($dayOfWeek, $_REQUEST['day'])) {
 			$selectedDates[] = $currentDate;
 		}
@@ -557,11 +553,12 @@ function mm_add_video_class() {
 	}
 	$ids = [];
 	$str = new convert ;
-	// echo "start adding\n";
-	// var_dump($selectedDates);
-	$vs->clear($_REQUEST['item_id']);
+	// $vs->clear($_REQUEST['item_id']);
+	// var_dump(get_class_methods($vs));
+	$startIndex = $vs->sessionCount($_REQUEST['item_id']);
+	// die('salam');
 	foreach($selectedDates as $index => $selectedDate) {
-		$t_price = $index+1 ;
+		$t_price = $startIndex+$index+1 ;
 		if($t_price!=3) {
 			$t_price_str = $str->finalcalc($t_price) . 'م';
 		}else {
@@ -577,7 +574,6 @@ function mm_add_video_class() {
 			'price'=>ceil($_REQUEST['total-price']/count($selectedDates)),
 			'video_link'=>$_REQUEST['video_link'],
 		];
-		// echo "insert\n";
 		$ids[] = $vs->insert($data);
 		$out['status'] = 1;
 	}
@@ -876,9 +872,17 @@ function mm_woocommerce_add_cart_item_data($cart_item_data, $product_id, $variat
 		$vs = new VideoSession();
 		$allSessions = $vs->loadByItemIds($product_id);
 		$handingDone = true;
+		$selectedVideoSessions = explode(',', $_POST['video_sessions']);
+		if(in_array("-1", $selectedVideoSessions)){
+			$vp = new VideoPay;
+			$vp->loadByItem($product_id);
+			$cart_item_data['warranty_price'] = $vp->start_pay_amount;
+			return $cart_item_data;
+		}
+		var_dump($selectedVideoSessions);
 		foreach($allSessions as $sessionId)
 		{
-			if(!in_array("$sessionId", explode(',', $_POST['video_sessions']))){
+			if(!in_array("$sessionId", $selectedVideoSessions)){
 				$handingDone = false;
 			}
 		}
@@ -899,7 +903,7 @@ function fixVideoSessions($inp) {
 	$tmp = explode(",", $inp);
 	$out = [];
 	foreach($tmp as $vsid) {
-		if((int)$vsid>0) {
+		if((int)$vsid!=0) {
 			$out[] = (int)$vsid;
 		}
 	}
@@ -1198,13 +1202,36 @@ function getVideoClasses( $product_id, $order_status = ['wc-completed','wc-proce
 
 function mm_woocommerce_after_add_to_cart_button(){
 	$product_id = get_the_ID();
-	
+	$vp = new VideoPay();
+	$vp->loadByItem($product_id);
 	$vs = new VideoSession();
 	$sessions= getVideoClasses($product_id);
 	$sessionDatas = $vs->idToNames($sessions);
 	if(get_post_meta($product_id, '_is_video', true) == 'yes'){
 		?>
 	<div class='video_sessions'>
+		<?php if(isset($vp->id)){ ?>
+		<form class="cart" action="" method="post" enctype="multipart/form-data">
+			<input name="video_sessions" type="hidden" value="-1">
+			<input name="quantity" type="hidden" value="1">
+			<div>
+				جزئیات اقساطی
+				<br/>
+				پیش پرداخت : 
+				<?php echo number_format($vp->start_pay_amount); ?>
+				<br/>
+				پرداخت اول: 
+				<?php echo number_format($vp->first_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->first_pay_date)) . ']'; ?>
+				<br/>
+				پرداخت دوم: 
+				<?php echo number_format($vp->second_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->second_pay_date)) . ']'; ?>
+			</div>
+			<button type="submit" name="add-to-cart" value="11181" class="single_add_to_cart_button button alt">
+				خرید اقساطی
+			</button>
+		</form>
+		<br/><br/><br/><br/>
+		<?php } ?>
 		<span>
 			جلسات خریداری شده تا کنون:
 		</span>
@@ -1234,6 +1261,8 @@ function mm_woocommerce_add_to_cart_validation( $passed, $product_id, $quantity,
 	global $woocommerce;
 	$vs = new VideoSession;
 	$vu = new VideoUser;
+	$vp = new VideoPay;
+	$isPay = false;
 	$myClassSessions = $vs->loadMyClassSessions();
 	$items = $woocommerce->cart->get_cart();
 	if(get_post_meta($product_id, '_is_video', true) == 'yes'){
@@ -1241,10 +1270,18 @@ function mm_woocommerce_add_to_cart_validation( $passed, $product_id, $quantity,
 		// echo $product_id."<br/>";
 		// var_dump($myClassSessions);
 		// die();
+		$svideoSessions = explode(',', $_REQUEST['video_sessions']);
+		if(array_search('-1', $svideoSessions)!==false){
+			$isPay = true;
+		}
 		foreach($myClassSessions as $_product_id=>$selectedSessions) {
 			if($_product_id == $product_id){
 				// die('a');
-				$newSessions = explode(',', $_REQUEST['video_sessions']);
+				if($isPay){
+					wc_add_notice( __( 'جلسه یا جلساتی از این کلاس قبلا خرید شده است امکان خرید اقساط نیست', 'textdomain' ), 'error' );
+					return false;
+				}
+				$newSessions = $svideoSessions;
 				for($i=0;$i<count($newSessions);$i++){
 					if($newSessions[$i]==""){
 						unset($newSessions[$i]);
@@ -1315,11 +1352,11 @@ function mm_woocommerce_add_to_cart_validation( $passed, $product_id, $quantity,
 			$_product_id = $values['data']->get_id();
 			if($_product_id == $product_id){
 				$selectedSessions = isset($values['video_sessions'])? $values['video_sessions']: null;
-				if($selectedSessions==null) {
-					wc_add_notice( __( 'این کلاس قبلا بطور کامل ثبت نام شده است', 'textdomain' ), 'error' );
+				if($selectedSessions==null || $isPay) {
+					wc_add_notice( __( 'این کلاس قبلا بطور کامل به سبد افزوده شده است', 'textdomain' ), 'error' );
 					return false;
 				}
-				$newSessions = explode(',', $_REQUEST['video_sessions']);
+				$newSessions = $svideoSessions;
 				$new = false;
 				foreach($newSessions as $newSession) {
 					if(!in_array($newSession, $selectedSessions)) {

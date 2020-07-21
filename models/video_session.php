@@ -1,5 +1,10 @@
 <?php
 class VideoSession extends MyModel {
+  public function sessionCount($item_id){
+    $results = $this->where("item_id = {$item_id}");
+    return count($results);
+  }
+
   public function __construct($id=null) {
     parent::__construct('video_session', $id);
   }
