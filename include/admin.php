@@ -1210,10 +1210,12 @@ function mm_woocommerce_after_add_to_cart_button(){
 	if(get_post_meta($product_id, '_is_video', true) == 'yes'){
 		?>
 	<div class='video_sessions'>
-		<?php if(isset($vp->id)){ ?>
+		<?php if(isset($vp->id) && false){ ?>
 		<form class="cart" action="" method="post" enctype="multipart/form-data">
+			<!--
 			<input name="video_sessions" type="hidden" value="-1">
 			<input name="quantity" type="hidden" value="1">
+			-->
 			<div>
 				جزئیات اقساطی
 				<br/>
@@ -1226,7 +1228,7 @@ function mm_woocommerce_after_add_to_cart_button(){
 				پرداخت دوم: 
 				<?php echo number_format($vp->second_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->second_pay_date)) . ']'; ?>
 			</div>
-			<button type="submit" name="add-to-cart" value="11181" class="single_add_to_cart_button button alt">
+			<button onclick="jQuery('#main_video_sessions').val('-1');" type="submit" name="add-to-cart" value="11181" class="single_add_to_cart_button button alt">
 				خرید اقساطی
 			</button>
 		</form>
