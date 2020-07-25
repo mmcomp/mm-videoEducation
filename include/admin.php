@@ -505,18 +505,19 @@ function mm_jalali_to_geregorian($inp) {
 }
 
 function mm_geregorian_to_jalali($inp) {
-	$inp = explode(' ', $inp);
-	$inp = $inp[0];
-	$inp = explode('-', $inp);
-	if(count($inp)!=3) {
-		return null;
-	}
-	if((int)$inp[0]>(int)$inp[2]) {
-		$tmp = jdate("Y/m/d", strtotime((int)$inp[0] . '-' . (int)$inp[1] . '-' . (int)$inp[2]));
-	}else {
-		$tmp = jdate("Y/m/d", strtotime((int)$inp[2] . '-' . (int)$inp[1] . '-' . (int)$inp[0]));
-	}
-	return $tmp[0].'/'.$tmp[1].'/'.$tmp[2];
+	return jdate("Y/m/d", strtotime($inp));
+	// $inp = explode(' ', $inp);
+	// $inp = $inp[0];
+	// $inp = explode('-', $inp);
+	// if(count($inp)!=3) {
+	// 	return null;
+	// }
+	// if((int)$inp[0]>(int)$inp[2]) {
+	// 	$tmp = jdate("Y/m/d", strtotime((int)$inp[0] . '-' . (int)$inp[1] . '-' . (int)$inp[2]));
+	// }else {
+	// 	$tmp = jdate("Y/m/d", strtotime((int)$inp[2] . '-' . (int)$inp[1] . '-' . (int)$inp[0]));
+	// }
+	// return $tmp[0].'/'.$tmp[1].'/'.$tmp[2];
 }
 
 function fixTime($inp) {
