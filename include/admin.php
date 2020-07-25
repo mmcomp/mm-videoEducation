@@ -505,7 +505,7 @@ function mm_jalali_to_geregorian($inp) {
 }
 
 function mm_geregorian_to_jalali($inp) {
-	return jdate("Y/m/d", strtotime($inp));
+	return mm_persian_to_english(jdate("Y/m/d", strtotime($inp)));
 	// $inp = explode(' ', $inp);
 	// $inp = $inp[0];
 	// $inp = explode('-', $inp);
