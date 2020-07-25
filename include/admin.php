@@ -512,9 +512,9 @@ function mm_geregorian_to_jalali($inp) {
 		return null;
 	}
 	if((int)$inp[0]>(int)$inp[2]) {
-		$tmp = gregorian_to_jalali((int)$inp[0], (int)$inp[1], (int)$inp[2]);
+		$tmp = jdate("Y/m/d", strtotime((int)$inp[0] . '-' . (int)$inp[1] . '-' . (int)$inp[2]));
 	}else {
-		$tmp = gregorian_to_jalali((int)$inp[2], (int)$inp[1], (int)$inp[0]);
+		$tmp = jdate("Y/m/d", strtotime((int)$inp[2] . '-' . (int)$inp[1] . '-' . (int)$inp[0]));
 	}
 	return $tmp[0].'/'.$tmp[1].'/'.$tmp[2];
 }
@@ -684,9 +684,9 @@ function mm_woocommerce_get_item_data($cart_data, $cart_item) {
 	if(get_post_meta($product_id, '_is_video', true) == 'yes' && isset($cart_item['video_sessions'])){
 		$vs = new VideoSession();
 		$custom_items[] = array(
-				'name'      => __( 'جلسه', 'woocommerce' ),
-				'value'     => $cart_item['video_sessions'],
-				'display'   => implode(' , ',$vs->idToNames($cart_item['video_sessions']))
+			'name'      => __( 'جلسه', 'woocommerce' ),
+			'value'     => $cart_item['video_sessions'],
+			'display'   => implode(' , ',$vs->idToNames($cart_item['video_sessions']))
 		);
 	}
 	return $custom_items;
@@ -1210,12 +1210,8 @@ function mm_woocommerce_after_add_to_cart_button(){
 	if(get_post_meta($product_id, '_is_video', true) == 'yes'){
 		?>
 	<div class='video_sessions'>
-		<?php if(isset($vp->id) && false){ ?>
+		<?php if(isset($vp->id)){ ?>
 		<form class="cart" action="" method="post" enctype="multipart/form-data">
-			<!--
-			<input name="video_sessions" type="hidden" value="-1">
-			<input name="quantity" type="hidden" value="1">
-			-->
 			<div>
 				جزئیات اقساطی
 				<br/>
