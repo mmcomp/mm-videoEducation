@@ -883,6 +883,7 @@ function mm_get_video_sessionPrice($video_sessions, $product_id) {
 function mm_woocommerce_add_cart_item_data($cart_item_data, $product_id, $variation_id){
 	if(get_post_meta($product_id, '_is_video', true) == 'yes'){
 		$vs = new VideoSession();
+		$vd = new VideoPayDetail;
 		$allSessions = $vs->loadByItemIds($product_id);
 		$handingDone = true;
 		$selectedVideoSessions = explode(',', $_POST['video_sessions']);
@@ -890,9 +891,19 @@ function mm_woocommerce_add_cart_item_data($cart_item_data, $product_id, $variat
 			$vp = new VideoPay;
 			$vp->loadByItem($product_id);
 			$cart_item_data['warranty_price'] = $vp->start_pay_amount;
+			$current_user = wp_get_current_user();
+			$vd->insertIfNot([
+				"product_id"=>$product_id,
+				"user_id"=>$current_user->ID,
+				"start_pay_amount"=>$vp->start_pay_amount,
+				"first_pay_date"=>$vp->first_pay_date,
+				"first_pay_amount"=>$vp->first_pay_amount,
+				"second_pay_date"=>$vp->second_pay_date,
+				"second_pay_amount"=>$vp->second_pay_amount
+			]);
 			return $cart_item_data;
 		}
-		var_dump($selectedVideoSessions);
+		// var_dump($selectedVideoSessions);
 		foreach($allSessions as $sessionId)
 		{
 			if(!in_array("$sessionId", $selectedVideoSessions)){
@@ -1015,11 +1026,11 @@ function _mm_woocommerce_thankyou() {
 }
 
 function mm_woocommerce_thankyou($order_id) {
+	/*
 	$order = wc_get_order( $order_id );
 	$orderItems = $order->get_items();
 	$vu = new VideoUser;
 	$vs = new VideoSession;
-	/*
 	$adobeConnect = new AdobeConnect("saied.banuie@gmail.com", "Banuie@159951");
 	foreach($orderItems as $orderItem) {
 		$product_id = version_compare( WC_VERSION, '3.0', '<' ) ? $orderItem['product_id'] : $orderItem->get_product_id();
@@ -1044,6 +1055,33 @@ function mm_woocommerce_thankyou($order_id) {
 		}
 	}
 	*/
+	$vd = new VideoPayDetail;
+	$order = wc_get_order( $order_id );
+	$orderItems = $order->get_items();
+	foreach($orderItems as $orderItem) {
+		$product_id = version_compare( WC_VERSION, '3.0', '<' ) ? $orderItem['product_id'] : $orderItem->get_product_id();
+		$custom_field = get_post_meta( $product_id, '_is_video', true);
+		if($custom_field=='yes') {
+			$data = $orderItem->get_formatted_meta_data();
+			$video_sessions = [];
+			foreach($data as $meta) {
+				if($meta->key == 'video_sessions') {
+					$video_sessions = explode(',', $meta->value);
+				}
+			}
+			if(count($video_sessions)==0) {
+				$current_user = wp_get_current_user();
+				$vd->insertIfNot([
+					"order_id"=>$order_id,
+					"product_id"=>$product_id,
+					"user_id"=>$current_user->ID,
+					"first_pay_date_done"=>date('Y-m-d H:i:s'),
+					"status"=>"checkedout"
+				]);
+			}
+
+		}
+	}
 	?>
 	<style>
 		.woocommerce-order-details {
