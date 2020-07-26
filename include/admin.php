@@ -1223,6 +1223,16 @@ function mm_woocommerce_after_add_to_cart_button(){
 	if(get_post_meta($product_id, '_is_video', true) == 'yes'){
 		?>
 	<?php if(isset($vp->id)){ ?>
+	<script>
+		jQuery(document).ready(function(){
+			jQuery('button[name="add-to-cart"]').each(function(id, field) {
+				if(jQuery(field).text() == 'افزودن به سبد خرید'){
+					jQuery(field).text('خرید کامل دوره');
+				}
+				// console.log(jQuery(field).text());
+			});
+		});
+	</script>
 	&nbsp;
 	<button onclick="jQuery('#pay-modal').modal('show');" type="button" name="add-to-cart" value="11181" class="single_add_to_cart_button button alt">
 		خرید اقساطی
