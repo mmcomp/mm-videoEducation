@@ -1222,26 +1222,46 @@ function mm_woocommerce_after_add_to_cart_button(){
 	$sessionDatas = $vs->idToNames($sessions);
 	if(get_post_meta($product_id, '_is_video', true) == 'yes'){
 		?>
+	<?php if(isset($vp->id)){ ?>
+	&nbsp;
+	<button onclick="jQuery('#pay-modal').modal('show');" type="button" name="add-to-cart" value="11181" class="single_add_to_cart_button button alt">
+		خرید اقساطی
+	</button>
+	<?php } ?>
 	<div class='video_sessions'>
 		<?php if(isset($vp->id)){ ?>
-		<form class="cart" action="" method="post" enctype="multipart/form-data">
-			<div>
-				جزئیات اقساطی
-				<br/>
-				پیش پرداخت : 
-				<?php echo number_format($vp->start_pay_amount); ?>
-				<br/>
-				پرداخت اول: 
-				<?php echo number_format($vp->first_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->first_pay_date)) . ']'; ?>
-				<br/>
-				پرداخت دوم: 
-				<?php echo number_format($vp->second_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->second_pay_date)) . ']'; ?>
+		<div class="modal" tabindex="-1" id="pay-modal" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">خرید اقساطی</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>خرید اقساطی:</p>
+					<div>
+						جزئیات اقساطی
+						<br/>
+						پیش پرداخت : 
+						<?php echo number_format($vp->start_pay_amount); ?>
+						<br/>
+						پرداخت اول: 
+						<?php echo number_format($vp->first_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->first_pay_date)) . ']'; ?>
+						<br/>
+						پرداخت دوم: 
+						<?php echo number_format($vp->second_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->second_pay_date)) . ']'; ?>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button onclick="jQuery('#main_video_sessions').val('-1');" type="submit" name="add-to-cart" value="11181" class="single_add_to_cart_button button alt btn btn-primary">تایید</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">انصراف</button>
+				</div>
 			</div>
-			<button onclick="jQuery('#main_video_sessions').val('-1');" type="submit" name="add-to-cart" value="11181" class="single_add_to_cart_button button alt">
-				خرید اقساطی
-			</button>
-		</form>
-		<br/><br/><br/><br/>
+		</div>
+		</div>
+
 		<?php } ?>
 		<span>
 			جلسات خریداری شده تا کنون:
