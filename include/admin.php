@@ -1265,7 +1265,7 @@ function mm_woocommerce_after_add_to_cart_button(){
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button onclick="jQuery('#main_video_sessions').val('-1');" type="submit" name="add-to-cart" value="11181" class="single_add_to_cart_button button alt btn btn-primary">تایید</button>
+					<button onclick="jQuery('#main_video_sessions').val('-1');" type="submit" name="add-to-cart" value="<?php echo $product_id; ?>" class="single_add_to_cart_button button alt btn btn-primary">تایید</button>
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">انصراف</button>
 				</div>
 			</div>
