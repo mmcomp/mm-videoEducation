@@ -119,7 +119,19 @@ function mm_woocommerce_product_data_panels() {
 	$registered = $vs->loadByItem($post->ID);
 
 	$vp = new VideoPay();
+	$price = get_post_meta($post->ID, '_regular_price', true); 
+
+	$totalPrice = ceil((int)$price * 1.1);
+	
+	$start_pay_amount = ceil($totalPrice / 3);
+	$first_pay_amount = ceil(($totalPrice - $start_pay_amount)/2);
+	$second_pay_amount = $totalPrice - $start_pay_amount - $first_pay_amount;
 	$vp->loadByItem($post->ID);
+	if(isset($vp->id)){
+		$start_pay_amount = $vp->start_pay_amount;
+		$first_pay_amount = $vp->first_pay_amount;
+		$second_pay_amount = $vp->second_pay_amount;
+	}	
 	?>
 	<div id='videoclass_options' class='panel woocommerce_options_panel hidden'>
 		<div class='options_group p-20'>
@@ -268,19 +280,19 @@ function mm_woocommerce_product_data_panels() {
 				<div class="col">
 					<div class="form-group">
 						<label for="start_pay_amount" style="margin: 0px !important;">پیش پرداخت</label>
-						<input type="number" class="form-control pays" id="start_pay_amount" name="start_pay_amount" placeholder="پیش پرداخت" value="<?php echo (isset($vp->id))?$vp->start_pay_amount:''; ?>" />
+						<input type="number" class="form-control pays" id="start_pay_amount" name="start_pay_amount" placeholder="پیش پرداخت" value="<?php echo $start_pay_amount; ?>" />
 					</div>
 				</div>
 				<div class="col">
 					<div class="form-group">
 						<label for="first_pay_amount" style="margin: 0px !important;">مبلغ قسط اول</label>
-						<input type="number" class="form-control pays" id="first_pay_amount" name="first_pay_amount" placeholder="مبلغ قسط اول" value="<?php echo (isset($vp->id))?$vp->first_pay_amount:''; ?>" />
+						<input type="number" class="form-control pays" id="first_pay_amount" name="first_pay_amount" placeholder="مبلغ قسط اول" value="<?php echo $first_pay_amount; ?>" />
 					</div>
 				</div>
 				<div class="col">
 					<div class="form-group">
 						<label for="second_pay_amount" style="margin: 0px !important;">مبلغ قسط دوم</label>
-						<input type="number" class="form-control pays" id="second_pay_amount" name="second_pay_amount" placeholder="مبلغ قسط دوم" value="<?php echo (isset($vp->id))?$vp->second_pay_amount:''; ?>" />
+						<input type="number" class="form-control pays" id="second_pay_amount" name="second_pay_amount" placeholder="مبلغ قسط دوم" value="<?php echo $second_pay_amount; ?>" />
 					</div>
 				</div>
 			</div>
