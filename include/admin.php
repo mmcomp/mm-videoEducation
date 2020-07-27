@@ -1279,35 +1279,63 @@ function mm_woocommerce_after_add_to_cart_button(){
 	<div class='video_sessions'>
 		<?php if(isset($vp->id)){ ?>
 		<div class="modal" tabindex="-1" id="pay-modal" role="dialog">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">خرید اقساطی</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
-					<p>خرید اقساطی:</p>
-					<div>
-						جزئیات اقساطی
-						<br/>
-						پیش پرداخت : 
-						<?php echo number_format($vp->start_pay_amount); ?>
-						<br/>
-						پرداخت اول: 
-						<?php echo number_format($vp->first_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->first_pay_date)) . ']'; ?>
-						<br/>
-						پرداخت دوم: 
-						<?php echo number_format($vp->second_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->second_pay_date)) . ']'; ?>
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">خرید اقساطی</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p>جزئیات خرید اقساطی:</p>
+						<div>
+							<table class="table table-striped">
+								<tbody>
+									<tr>
+										<td>
+										پیش پرداخت : 
+										</td>
+										<td>
+										<?php echo number_format($vp->start_pay_amount); ?>
+										</td>
+									</tr>
+									<tr>
+										<td>
+										پرداخت اول: 
+										</td>
+										<td>
+										<?php echo number_format($vp->first_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->first_pay_date)) . ']'; ?>
+										</td>
+									</tr>
+									<tr>
+										<td>
+										پرداخت دوم: 
+										</td>
+										<td>
+										<?php echo number_format($vp->second_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->second_pay_date)) . ']'; ?>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<!--
+							پیش پرداخت : 
+							<?php echo number_format($vp->start_pay_amount); ?>
+							<br/>
+							پرداخت اول: 
+							<?php echo number_format($vp->first_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->first_pay_date)) . ']'; ?>
+							<br/>
+							پرداخت دوم: 
+							<?php echo number_format($vp->second_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->second_pay_date)) . ']'; ?>
+							-->
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button onclick="jQuery('#main_video_sessions').val('-1');" type="submit" name="add-to-cart" value="<?php echo $product_id; ?>" class="single_add_to_cart_button button alt btn btn-primary">تایید</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">انصراف</button>
 					</div>
 				</div>
-				<div class="modal-footer">
-					<button onclick="jQuery('#main_video_sessions').val('-1');" type="submit" name="add-to-cart" value="<?php echo $product_id; ?>" class="single_add_to_cart_button button alt btn btn-primary">تایید</button>
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">انصراف</button>
-				</div>
 			</div>
-		</div>
 		</div>
 
 		<?php } ?>
