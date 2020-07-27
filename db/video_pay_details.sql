@@ -1,0 +1,26 @@
+CREATE TABLE `divi_video_pay_details` (
+  `id` int(11) NOT NULL,
+  `product_id` int(11) DEFAULT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `start_pay_amount` int(11) DEFAULT NULL,
+  `first_pay_date` datetime DEFAULT NULL,
+  `first_pay_amount` int(11) DEFAULT NULL,
+  `second_pay_date` datetime DEFAULT NULL,
+  `second_pay_amount` int(11) DEFAULT NULL,
+  `first_pay_date_done` datetime DEFAULT NULL,
+  `second_pay_date_done` datetime DEFAULT NULL,
+  `deleted` tinyint(1) DEFAULT 0,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
+
+
+ALTER TABLE `divi_video_pay_details`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `divi_video_pay_details`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+COMMIT;
+
+ALTER TABLE `divi_video_pay_details` ADD `status` ENUM('cart','checkedout','canceled') NOT NULL DEFAULT 'cart' AFTER `second_pay_date_done`;

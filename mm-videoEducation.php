@@ -15,6 +15,7 @@ include_once 'models/video_homework.php';
 include_once 'models/video_user.php';
 include_once 'models/video_chat.php';
 include_once 'models/video_pay.php';
+include_once 'models/video_pay_detail.php';
 require_once 'include/admin.php';
 require_once 'include/jdf.php';
 require_once 'include/i2S.php';
