@@ -21,7 +21,7 @@ require_once 'include/jdf.php';
 require_once 'include/i2S.php';
 include_once 'include/adobe.php';
 
-
+ 
 
 //------------------ADMIN------------------
 add_filter('product_type_options', 'mm_product_type_options');
