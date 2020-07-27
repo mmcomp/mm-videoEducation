@@ -1290,7 +1290,17 @@ function mm_woocommerce_after_add_to_cart_button(){
 					<div class="modal-body">
 						<p>جزئیات خرید اقساطی:</p>
 						<div>
-							<table class="table table-striped">
+							<table class="table table-danger table-striped ha-table dataTable no-footer">
+								<thead>
+									<tr>
+										<th>
+										موضوع
+										</th>
+										<th>
+										مقدار
+										</th>
+									</tr>
+								</thead>
 								<tbody>
 									<tr>
 										<td>
