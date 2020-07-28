@@ -1297,14 +1297,17 @@ function mm_woocommerce_after_add_to_cart_button(){
 					<div class="modal-body">
 						<p>جزئیات خرید اقساطی:</p>
 						<div>
-							<table class="table table-danger table-striped ha-table dataTable no-footer">
+							<table class="table table-bordered table-gray table-hover">
 								<thead>
 									<tr>
 										<th>
-										موضوع
+										#
 										</th>
 										<th>
-										مقدار
+										مبلغ
+										</th>
+										<th>
+										تاریخ سر رسید
 										</th>
 									</tr>
 								</thead>
@@ -1316,13 +1319,19 @@ function mm_woocommerce_after_add_to_cart_button(){
 										<td>
 										<?php echo number_format($vp->start_pay_amount); ?>
 										</td>
+										<td>
+											هم اکنون
+										</td>
 									</tr>
 									<tr>
 										<td>
 										پرداخت اول: 
 										</td>
 										<td>
-										<?php echo number_format($vp->first_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->first_pay_date)) . ']'; ?>
+										<?php echo number_format($vp->first_pay_amount); ?>
+										</td>
+										<td>
+											<?php echo jdate("Y/m/d", strtotime($vp->first_pay_date));  ?>
 										</td>
 									</tr>
 									<tr>
@@ -1330,21 +1339,22 @@ function mm_woocommerce_after_add_to_cart_button(){
 										پرداخت دوم: 
 										</td>
 										<td>
-										<?php echo number_format($vp->second_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->second_pay_date)) . ']'; ?>
+										<?php echo number_format($vp->second_pay_amount)  ?>
+										</td>
+										<td>
+											<?php echo jdate("Y/m/d", strtotime($vp->second_pay_date));  ?>
 										</td>
 									</tr>
 								</tbody>
 							</table>
-							<!--
-							پیش پرداخت : 
-							<?php echo number_format($vp->start_pay_amount); ?>
-							<br/>
-							پرداخت اول: 
-							<?php echo number_format($vp->first_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->first_pay_date)) . ']'; ?>
-							<br/>
-							پرداخت دوم: 
-							<?php echo number_format($vp->second_pay_amount) . '[' . jdate("Y/m/d", strtotime($vp->second_pay_date)) . ']'; ?>
-							-->
+							<h4>
+								جمع پرداختی : <?php echo number_format((int) $vp->start_pay_amount +(int)$vp->first_pay_amount+(int)$vp->second_pay_amount); ?>
+							</h4>
+							<sub>
+								(
+								در حالت اقساطی میزان ۱۰ درصد  به قیمت نقدی اضافه  میگردد
+								)
+							</sub>
 						</div>
 					</div>
 					<div class="modal-footer">
