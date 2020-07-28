@@ -1325,7 +1325,7 @@ function mm_woocommerce_after_add_to_cart_button(){
 									</tr>
 									<tr>
 										<td>
-										پرداخت اول: 
+										قسط اول: 
 										</td>
 										<td>
 										<?php echo number_format($vp->first_pay_amount); ?>
@@ -1336,7 +1336,7 @@ function mm_woocommerce_after_add_to_cart_button(){
 									</tr>
 									<tr>
 										<td>
-										پرداخت دوم: 
+										قسط دوم: 
 										</td>
 										<td>
 										<?php echo number_format($vp->second_pay_amount)  ?>
