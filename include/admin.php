@@ -884,6 +884,7 @@ function mm_woocommerce_add_cart_item_data($cart_item_data, $product_id, $variat
 	if(get_post_meta($product_id, '_is_video', true) == 'yes'){
 		$vs = new VideoSession();
 		$vd = new VideoPayDetail;
+		$vp = new VideoPay;
 		$allSessions = $vs->loadByItemIds($product_id);
 		$handingDone = true;
 		$selectedVideoSessions = explode(',', $_POST['video_sessions']);
@@ -892,15 +893,18 @@ function mm_woocommerce_add_cart_item_data($cart_item_data, $product_id, $variat
 			$vp->loadByItem($product_id);
 			$cart_item_data['warranty_price'] = $vp->start_pay_amount;
 			$current_user = wp_get_current_user();
-			$vd->insertIfNot([
-				"product_id"=>$product_id,
-				"user_id"=>$current_user->ID,
-				"start_pay_amount"=>$vp->start_pay_amount,
-				"first_pay_date"=>$vp->first_pay_date,
-				"first_pay_amount"=>$vp->first_pay_amount,
-				"second_pay_date"=>$vp->second_pay_date,
-				"second_pay_amount"=>$vp->second_pay_amount
-			]);
+			$vp->loadByItem($product_id);
+			if(isset($vp->id)){
+				$vd->insertIfNot([
+					"product_id"=>$product_id,
+					"user_id"=>$current_user->ID,
+					"start_pay_amount"=>$vp->start_pay_amount,
+					"first_pay_date"=>$vp->first_pay_date,
+					"first_pay_amount"=>$vp->first_pay_amount,
+					"second_pay_date"=>$vp->second_pay_date,
+					"second_pay_amount"=>$vp->second_pay_amount
+				]);	
+			}
 			return $cart_item_data;
 		}
 		// var_dump($selectedVideoSessions);
@@ -1056,6 +1060,7 @@ function mm_woocommerce_thankyou($order_id) {
 	}
 	*/
 	$vd = new VideoPayDetail;
+	$vp = new VideoPay;
 	$order = wc_get_order( $order_id );
 	$orderItems = $order->get_items();
 	foreach($orderItems as $orderItem) {
@@ -1071,13 +1076,14 @@ function mm_woocommerce_thankyou($order_id) {
 			}
 			if(count($video_sessions)==0) {
 				$current_user = wp_get_current_user();
-				$vd->insertIfNot([
-					"order_id"=>$order_id,
-					"product_id"=>$product_id,
-					"user_id"=>$current_user->ID,
-					"first_pay_date_done"=>date('Y-m-d H:i:s'),
-					"status"=>"checkedout"
-				]);
+				$vd->loadByProductAndUser($product_id, $current_user->ID);
+				if(isset($vd->id)){
+					$vd->update([
+						"order_id"=>$order_id,
+						"first_pay_date_done"=>date('Y-m-d H:i:s'),
+						"status"=>"checkedout"
+					]);
+				}
 			}
 
 		}
