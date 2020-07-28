@@ -1334,6 +1334,7 @@ function mm_woocommerce_after_add_to_cart_button(){
 											<?php echo jdate("Y/m/d", strtotime($vp->first_pay_date));  ?>
 										</td>
 									</tr>
+									<?php if( (int)$vp->second_pay_amount > 0 ):?>
 									<tr>
 										<td>
 										قسط دوم: 
@@ -1345,6 +1346,7 @@ function mm_woocommerce_after_add_to_cart_button(){
 											<?php echo jdate("Y/m/d", strtotime($vp->second_pay_date));  ?>
 										</td>
 									</tr>
+									<?php endif; ?>
 								</tbody>
 							</table>
 							<h4>
