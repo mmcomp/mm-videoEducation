@@ -1080,7 +1080,7 @@ function mm_woocommerce_thankyou($order_id) {
 				if(isset($vd->id)){
 					$vd->update([
 						"order_id"=>$order_id,
-						"first_pay_date_done"=>date('Y-m-d H:i:s'),
+						// "first_pay_date_done"=>date('Y-m-d H:i:s'),
 						"status"=>"checkedout"
 					]);
 				}
