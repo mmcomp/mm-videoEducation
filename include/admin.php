@@ -306,7 +306,7 @@ function mm_woocommerce_product_data_panels() {
 				<div class="col">
 					<div class="form-group">
 						<label for="second_pay_date" style="margin: 0px !important;">تاریخ قسط دوم</label>
-						<input type="text" class="form-control pays" id="second_pay_date" name="second_pay_date" placeholder="تاریخ قسط دوم" value="<?php echo (isset($vp->id))?mm_geregorian_to_jalali($vp->second_pay_date):''; ?>" />
+						<input type="text" class="form-control pays" id="second_pay_date" name="second_pay_date" placeholder="تاریخ قسط دوم" value="<?php echo (isset($vp->id) && $vp->second_pay_date!='0000-00-00 00:00:00')?mm_geregorian_to_jalali($vp->second_pay_date):''; ?>" />
 					</div>
 				</div>
 				<div class="col">
@@ -672,9 +672,10 @@ function mm_add_video_pay() {
 		"second_pay_date"=>trim($_REQUEST["second_pay_date"]),
 		"second_pay_amount"=>(int)mm_persian_to_english(trim($_REQUEST["second_pay_amount"]))
 	];
-	if($data['first_pay_date']!='' && $data['second_pay_date']!='') {
+	if($data['first_pay_date']!=''/* && $data['second_pay_date']!=''*/) {
 		$data['first_pay_date'] = mm_jalali_to_geregorian($data['first_pay_date']);
-		$data['second_pay_date'] = mm_jalali_to_geregorian($data['second_pay_date']);
+		if($data['second_pay_date']!='')
+			$data['second_pay_date'] = mm_jalali_to_geregorian($data['second_pay_date']);
 		$data['id'] = $vp->insert($data);
 	}
 
