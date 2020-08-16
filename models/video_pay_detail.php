@@ -16,7 +16,7 @@ class VideoPayDetail extends MyModel {
 
   public function loadByProductAndUser($product_id, $user_id){
     $results = $this->where("product_id = {$product_id} AND user_id = {$user_id} ");
-    if(!isset($results[0])){
+    if(isset($results[0])){
       foreach($results[0] as $key=>$value) {
         $this->$key = $value;
       }
@@ -32,3 +32,4 @@ class VideoPayDetail extends MyModel {
     }
   }
 }
+
