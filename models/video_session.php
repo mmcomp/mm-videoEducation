@@ -37,7 +37,7 @@ class VideoSession extends MyModel {
       return $this->where("item_id = {$item_id}");
     }
     $today = date("Y-m-d");
-    $results = $this->where("item_id = {$item_id} and start_date>='{$today}'");
+    $results = $this->where("item_id = {$item_id} and start_date>='{$today}'", " start_date ");
     $passed = false;
     if(count($results)==0) {
       $results = $this->where("item_id = {$item_id}");

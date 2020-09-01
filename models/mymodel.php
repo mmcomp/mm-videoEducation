@@ -12,12 +12,17 @@ class MyModel extends Model {
     parent::where("id = {$id} and deleted = 0");
   }
 
-  public function where( $where = null ) {
+  public function where( $where = null, $order = null ) {
     if($where==null) {
       $where = 'deleted = 0';
     }else {
       $where .= ' and deleted = 0';
     }
+    
+    if($order != null) {
+      $where .= ' ORDER BY ' . $order;
+    }
+
     return parent::where($where);
   }
 
