@@ -131,7 +131,10 @@ function mm_woocommerce_product_data_panels() {
 		$start_pay_amount = $vp->start_pay_amount;
 		$first_pay_amount = $vp->first_pay_amount;
 		$second_pay_amount = $vp->second_pay_amount;
-	}	
+	}
+	
+	$vc = new VideoClass();
+	$videoClasses = $vc->where();
 	?>
 	<div id='videoclass_options' class='panel woocommerce_options_panel hidden'>
 		<div class='options_group p-20'>
@@ -171,6 +174,14 @@ function mm_woocommerce_product_data_panels() {
 					<input type="text" style="width: 100%;" class="" id="total_video_link" placeholder="لینک ویدئو" />
 				</div>
 				<div class="col-3 mb-15">
+					<select id="total_video_class" style="width: 100%; max-height: 40px !important;" class="form-control" multiple>
+						<option disabled>کلاس ها</option>
+						<?php foreach($videoClasses as $videoClass) {?>
+						<option value="<?php echo $videoClass->id; ?>"><?php echo $videoClass->class; ?></option>
+						<?php } ?>
+					</select>
+				</div>
+				<div class="col-3 mb-15">
 					<a href="#" class="btn btn-primary btn-sm" onclick="return addGroupSessions(<?php echo $post->ID; ?>);">
 						ایجاد
 					</a>
@@ -185,6 +196,7 @@ function mm_woocommerce_product_data_panels() {
 				<div class="col text-center">ساعت پایان</div>
 				<div class="col text-center">قیمت</div>
 				<div class="col text-center">فایل</div>
+				<div class="col text-center">کلاس</div>
 				<div class="col text-center">#</div>
 			</div>
 			<hr />
@@ -203,6 +215,17 @@ function mm_woocommerce_product_data_panels() {
 				<div class="col text-center"></div>
 				<?php } ?>
 				<div class="col text-center">
+					<?php 
+					$sesses = $vc->loadBySession($register->id);
+					$vcIds = [];
+					foreach($sesses as $sess) {
+						echo $sess->class . "<br/>";
+						$vcIds[] = $sess->id;
+					} 
+					$registered[$i]->video_class = $vcIds;
+					?>
+				</div>
+				<div class="col text-center">
 					<a href="#" onclick="return startEditClass(<?php echo $i; ?>);" class="btn btn-success btn-sm my-half">
 						ویرایش
 					</a>
@@ -216,11 +239,11 @@ function mm_woocommerce_product_data_panels() {
 			<?php } ?>
 			<div class="row align-items-center mb-15">
 				<div class="col">
-				اصلاح
-				/
-				<a href="#" onclick="return startNewClass();">
-				جدید
-				</a>
+					اصلاح
+					/
+					<a href="#" onclick="return startNewClass();">
+					جدید
+					</a>
 				</div>
 				<div class="col text-center">
 					<input placeholder="نام" type="text" id="_video_class_name" style="width: 100%;" class="" />
@@ -251,6 +274,19 @@ function mm_woocommerce_product_data_panels() {
 				<div class="col-2">لینک ویدئو :</div>
 				<div class="col-10">
 					<input id="_video_class_video_link" type="text" style="width: 100%;" class="" placeholder="لینک اصلی">
+				</div>
+			</div>
+			<div class="row align-items-center mb-15">
+				<div class="col-2">
+					کلاس :
+				</div>
+				<div class="col-10">
+					<select id="_video_class_video_class" style="width: 100%; max-height: 40px !important;" class="form-control" multiple>
+						<option disabled>کلاس ها</option>
+						<?php foreach($videoClasses as $videoClass) {?>
+						<option value="<?php echo $videoClass->id; ?>"><?php echo $videoClass->class; ?></option>
+						<?php } ?>
+					</select>
 				</div>
 			</div>
 			<div class="row align-items-center mb-15">
@@ -334,6 +370,7 @@ function mm_woocommerce_product_data_panels() {
 			var data = {
 				"name": jQuery("#classname").val().trim(),
 				"video_link": jQuery("#total_video_link").val().trim(),
+				"video_class": jQuery("#total_video_class").val(),
 				"start_time": jQuery("#classstart_time").val().trim(),
 				"end_time": jQuery("#classend_time").val().trim(),
 				"from-date": jQuery("#from-date").val().trim(),
@@ -374,6 +411,7 @@ function mm_woocommerce_product_data_panels() {
 			formData.append('price', jQuery("#_video_class_price").val().trim());
 			formData.append('session_type', jQuery("#_video_class_session_type").val().trim());
 			formData.append('video_link', jQuery("#_video_class_video_link").val().trim());
+			formData.append('video_class', jQuery("#_video_class_video_class").val());
 			if(jQuery("#_video_delete_file").prop('checked')) {
 				formData.append('delete_file', '1'); 
 			}
@@ -440,6 +478,13 @@ function mm_woocommerce_product_data_panels() {
 			jQuery("#_video_class_price").val(registers[i].price);
 			jQuery("#_video_class_session_type").val(registers[i].session_type);
 			jQuery("#_video_class_video_link").val(registers[i].video_link);
+			// jQuery("#_video_class_video_class").val(registers[i].video_class);
+			jQuery("#_video_class_video_class option").prop('selected', false);
+			if(registers[i].video_class.length>0) {
+				for(var v of registers[i].video_class) {
+					jQuery("#_video_class_video_class option[value='" + v + "']").prop('selected', true);
+				}
+			}
 			return false;
 		}
 
@@ -556,6 +601,7 @@ function mm_add_video_class() {
 	}
 	$currentDate = $fromDate;
 	$vs = new VideoSession();
+	$vsc = new VideoSessionClass();
 	$selectedDates = [];
 	while(strtotime($currentDate)<=strtotime($toDate)) {
 		$dayOfWeek = strtolower(date("l", strtotime($currentDate)));
@@ -587,7 +633,19 @@ function mm_add_video_class() {
 			'price'=>ceil($_REQUEST['total-price']/count($selectedDates)),
 			'video_link'=>$_REQUEST['video_link'],
 		];
-		$ids[] = $vs->insert($data);
+		$id = $vs->insert($data);
+		$videoClasses = $_REQUEST['video_class'];
+		foreach($videoClasses as $vc) {
+			$vc = (int)$vc;
+			if($vc> 0) {
+				$vsc->insert([
+					"video_class"=>$vc,
+					"session_id"=>$id,
+				]);
+			}
+		}
+
+		$ids[] = $id;
 		$out['status'] = 1;
 	}
 	
@@ -625,12 +683,26 @@ function mm_save_video_class() {
 	// var_dump($data);
 	// var_dump($_REQUEST['id']);
 	$vs = new VideoSession();
+	$vsc = new VideoSessionClass();
 	if((int)$_REQUEST['id']>0) {
 		if($vs->update($data, $_REQUEST['id'])) {
 			$data['id'] = $_REQUEST['id'];
 			$out['status'] = 1;
 			$out['data'] = $data;
 		}
+		$sql = "UPDATE #PRE#video_session_class SET deleted = 1 WHERE session_id = " . $_REQUEST['id'];
+		$vsc->query($sql);
+		$videoClasses = explode(',', $_REQUEST['video_class']);
+		foreach($videoClasses as $vc) {
+			$vc = (int)$vc;
+			if($vc> 0) {
+				$vsc->insert([
+					"session_id"=>$_REQUEST['id'],
+					"video_class"=>$vc
+				]);	
+			}
+		}
+
 	}else {
 		$data['id'] = $vs->insert($data);
 		$out['status'] = 1;
