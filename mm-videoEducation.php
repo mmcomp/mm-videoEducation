@@ -8,6 +8,7 @@
  * Author URI: https://www.linkedin.com/in/mehrdad-mirsamie-718a8440/
  */
 
+include_once 'mm-config.php';
 include_once 'models/base.php';
 include_once 'models/mymodel.php';
 include_once 'models/video_session.php';
@@ -23,6 +24,7 @@ require_once 'include/admin.php';
 require_once 'include/jdf.php';
 require_once 'include/i2S.php';
 include_once 'include/adobe.php';
+include_once 'include/skyroom.php';
 
  
 
