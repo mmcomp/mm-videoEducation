@@ -424,8 +424,9 @@ function mm_woocommerce_product_data_panels() {
 			request.onload = function (inp) {
 				console.log(inp);
 				if (request.status == 200) {
+					console.log('Response: ', request.responseText);
 					alert('ثبت با موفقیت انجام شد');
-					jQuery("form#post").submit();
+					// jQuery("form#post").submit();
 				} else {
 					alert('خطا در ثبت');
 				}
@@ -704,6 +705,7 @@ function mm_save_video_class() {
 		}
 
 	}else {
+		echo "Inserting :\n";
 		$data['id'] = $vs->insert($data);
 		$out['status'] = 1;
 		$out['data'] = $data;

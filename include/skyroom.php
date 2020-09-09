@@ -21,7 +21,7 @@ class SkyRoom {
         $result = curl_exec($ch);
         curl_close($ch);
         try{
-          $result = json_decode($result);
+          $result = json_decode($result, true);
         }catch(Exception $error) {
           $result = null;
         }
@@ -30,7 +30,6 @@ class SkyRoom {
 
     public function createRoom($name, $title, $max_users, $op_login_first = true, $guest_login = false) {
       $room = $this->request("getRoom", "POST", ["name"=>$name]);
-      
       if($room['ok']==false){
         return $this->request("createRoom", "POST", [
           "name"=>$name,

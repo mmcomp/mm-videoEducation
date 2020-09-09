@@ -445,11 +445,15 @@ class VideoSession extends MyModel {
     // $adobeConnect = new AdobeConnect("saied.banuie@gmail.com", "Banuie@159951");
     // $sessionPath = uniqid('aref-');
     $data['name'] = str_replace('ی', 'ي', $data['name']);
+    global $SKYROOM_ENABLED;
+    global $SKYROOM_APIKEY;
+    global $SKYROOM_BASEURL;
+
     if(isset($SKYROOM_ENABLED) && $SKYROOM_ENABLED){
       $skyroom = new SkyRoom($SKYROOM_APIKEY, $SKYROOM_BASEURL);
-      $result = $skyroom->createRoom($data['name'], $data['name']);
+      $result = $skyroom->createRoom($data['name'], $data['name'], 60);
       if($result['ok']){
-        $data['sco_id'] = $result['result'];
+        $data['sco_id'] = "" . $result['result'] . "";
       }
     }
     // $sco_id = $adobeConnect->createMeeting($data['name'], $sessionPath);
@@ -460,6 +464,8 @@ class VideoSession extends MyModel {
     // }
     // $data['sco_id'] = $sco_id;
     // $data['adobe_path'] = $sessionPath;
+    // var_dump($data);
+    // die();
     return parent::insert($data);
   }
 
