@@ -23,7 +23,7 @@ class VideoUser extends MyModel {
 
     if(isset($SKYROOM_ENABLED) && $SKYROOM_ENABLED){
       $skyroom = new SkyRoom($SKYROOM_APIKEY, $SKYROOM_BASEURL);
-      $result = $skyroom->createUser($current_user->user_login, $password, $current_user->user_firstname . ' ' . $current_user->user_lastname);
+      $result = $skyroom->createUser('aref_' . $current_user->user_login, $password, $current_user->user_firstname . ' ' . $current_user->user_lastname);
       if($result['ok']){
         $data['principal_id'] = $result['result']['id'];
         $data['user_id'] = $current_user->ID;
