@@ -1105,6 +1105,39 @@ function _mm_woocommerce_thankyou() {
 }
 
 function mm_woocommerce_thankyou($order_id) {
+	global $SKYROOM_ENABLED;
+    global $SKYROOM_APIKEY;
+    global $SKYROOM_BASEURL;
+
+    if(isset($SKYROOM_ENABLED) && $SKYROOM_ENABLED){
+		$order = wc_get_order( $order_id );
+		$orderItems = $order->get_items();
+		$vu = new VideoUser;
+		$vs = new VideoSession;
+		$skyroom = new SkyRoom($SKYROOM_APIKEY, $SKYROOM_BASEURL);
+		foreach($orderItems as $orderItem) {
+			$product_id = version_compare( WC_VERSION, '3.0', '<' ) ? $orderItem['product_id'] : $orderItem->get_product_id();
+			$custom_field = get_post_meta( $product_id, '_is_video', true);
+			if($custom_field=='yes') {
+				$vu->addUser();
+				$data = $orderItem->get_formatted_meta_data();
+				$video_sessions = [];
+				foreach($data as $meta) {
+					if($meta->key == 'video_sessions') {
+						$video_sessions = explode(',', $meta->value);
+					}
+				}
+				if(count($video_sessions)==0) {
+					$videoSessions = $vs->loadByItem($product_id);
+				}else {
+					$videoSessions = $vs->loadByIds($video_sessions);
+				}
+				foreach($videoSessions as $videoSession) {
+					$skyroom->addUserToRoom($vu->principal_id, [["user_id" => $videoSession->sco_id]]);
+				}
+			}
+		}
+    }
 	/*
 	$order = wc_get_order( $order_id );
 	$orderItems = $order->get_items();
@@ -1134,6 +1167,10 @@ function mm_woocommerce_thankyou($order_id) {
 		}
 	}
 	*/
+
+
+
+
 	$vd = new VideoPayDetail;
 	$vp = new VideoPay;
 	$order = wc_get_order( $order_id );

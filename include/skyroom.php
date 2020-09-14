@@ -42,4 +42,28 @@ class SkyRoom {
 
       return $room;
     }
+    
+    public function createUser($username, $password, $nickname, $status = 1, $is_public = true) {
+      $room = $this->request("getUser", "POST", ["username"=>$username]);
+      if($room['ok']==false){
+        $this->request("createUser", "POST", [
+          "username"=>$username,
+          "password"=>$password,
+          "nickname"=>$nickname,
+          "status"=>$status,
+          "is_public"=>$is_public
+        ]);
+
+        return $this->request("getUser", "POST", ["username"=>$username]);
+      }
+
+      return $room;
+    }
+        
+    public function addUserToRoom($room_id, $users) {
+      return $this->request("addRoomUsers", "POST", [
+        "room_id"=>$room_id,
+        "users"=>$users
+      ]);
+    }
 }

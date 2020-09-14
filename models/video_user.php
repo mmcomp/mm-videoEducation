@@ -4,7 +4,7 @@ class VideoUser extends MyModel {
     parent::__construct('video_users', $id);
   }
 
-  /*
+  
   public function addUser($readd = false) {
     $current_user = wp_get_current_user();
     $user = $this->where('user_id = ' . $current_user->ID);
@@ -12,6 +12,35 @@ class VideoUser extends MyModel {
       return $user[0];
     }
 
+    $password = uniqid('pass-');
+    if($readd && isset($user[0])) {
+      $password = $user[0]->password;
+    }
+
+    global $SKYROOM_ENABLED;
+    global $SKYROOM_APIKEY;
+    global $SKYROOM_BASEURL;
+
+    if(isset($SKYROOM_ENABLED) && $SKYROOM_ENABLED){
+      $skyroom = new SkyRoom($SKYROOM_APIKEY, $SKYROOM_BASEURL);
+      $result = $skyroom->createUser($current_user->user_login, $password, $current_user->user_firstname . ' ' . $current_user->user_lastname);
+      if($result['ok']){
+        $data['principal_id'] = $result['result']['id'];
+        $data['user_id'] = $current_user->ID;
+        $data['password'] = $password;
+        if($readd && isset($user[0])) {
+          $id = $user[0]->id;
+          parent::update($data);
+        }else {
+          $id = parent::insert($data);
+        }
+        $this->find($id);
+        return null;
+      }
+    }
+    return null;
+
+    /*
     $adobeConnect = new AdobeConnect("saied.banuie@gmail.com", "Banuie@159951");
     $password = uniqid('pass-');
     if($readd && isset($user[0])) {
@@ -36,8 +65,9 @@ class VideoUser extends MyModel {
       return null;
     }
     return null;
+    */
   }
-  */
+  
 
   /*
   public function getSession() {
