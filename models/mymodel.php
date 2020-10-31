@@ -21,6 +21,15 @@ class MyModel extends Model {
     return parent::where($where);
   }
 
+  public function whereWithOrder( $where = null, $order = null ) {
+    if($where==null) {
+      $where = 'deleted = 0';
+    }else {
+      $where .= ' and deleted = 0';
+    }
+    return parent::where($where . (($order!=null)?$order:''));
+  }
+
   public function insert($data) {
     $data['created_at'] = date('Y-m-d H:i:s');
     $data['updated_at'] = $data['created_at'];

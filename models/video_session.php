@@ -29,13 +29,13 @@ class VideoSession extends MyModel {
 
   public function loadByItem($item_id, $currents = false, $advance = false) {
     if($currents===false) {
-      return $this->where("item_id = {$item_id}");
+      return $this->whereWithOrder("item_id = {$item_id}", " ORDER By `start_date`");
     }
     $today = date("Y-m-d");
-    $results = $this->where("item_id = {$item_id} and start_date>='{$today}'");
+    $results = $this->whereWithOrder("item_id = {$item_id} and start_date>='{$today}'", " ORDER By `start_date`");
     $passed = false;
     if(count($results)==0) {
-      $results = $this->where("item_id = {$item_id}");
+      $results = $this->whereWithOrder("item_id = {$item_id}", " ORDER By `start_date`");
       $passed = true;
     }
 

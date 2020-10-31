@@ -125,9 +125,11 @@ function mm_woocommerce_product_data_panels() {
 		<div class='options_group p-20'>
 			<h3 class="text-center mb-20">تعریف جلسات</h3>
 			<div class="row">
-				<div class="col-3 mb-15">
+				<div class="col mb-15">
 					<input type="text" style="width: 100%;" class="" id="classname" placeholder="نام" />
 				</div>
+			</div>
+			<div class="row">
 				<div class="col-3 mb-15">
 					<input type="text" style="width: 100%;" class="" id="classstart_time" placeholder="شروع" />
 				</div>
