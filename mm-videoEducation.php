@@ -8,6 +8,7 @@
  * Author URI: https://www.linkedin.com/in/mehrdad-mirsamie-718a8440/
  */
 
+include_once 'mm-config.php';
 include_once 'models/base.php';
 include_once 'models/mymodel.php';
 include_once 'models/video_session.php';
@@ -15,12 +16,17 @@ include_once 'models/video_homework.php';
 include_once 'models/video_user.php';
 include_once 'models/video_chat.php';
 include_once 'models/video_pay.php';
+include_once 'models/video_pay_detail.php';
+include_once 'models/video_class.php';
+include_once 'models/video_user_class.php';
+include_once 'models/video_session_class.php';
 require_once 'include/admin.php';
 require_once 'include/jdf.php';
 require_once 'include/i2S.php';
 include_once 'include/adobe.php';
+include_once 'include/skyroom.php';
 
-
+ 
 
 //------------------ADMIN------------------
 add_filter('product_type_options', 'mm_product_type_options');

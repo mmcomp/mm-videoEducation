@@ -119,7 +119,22 @@ function mm_woocommerce_product_data_panels() {
 	$registered = $vs->loadByItem($post->ID);
 
 	$vp = new VideoPay();
+	$price = get_post_meta($post->ID, '_regular_price', true); 
+
+	$totalPrice = ceil((int)$price * 1.1);
+	
+	$start_pay_amount = ceil($totalPrice / 3);
+	$first_pay_amount = ceil(($totalPrice - $start_pay_amount)/2);
+	$second_pay_amount = $totalPrice - $start_pay_amount - $first_pay_amount;
 	$vp->loadByItem($post->ID);
+	if(isset($vp->id)){
+		$start_pay_amount = $vp->start_pay_amount;
+		$first_pay_amount = $vp->first_pay_amount;
+		$second_pay_amount = $vp->second_pay_amount;
+	}
+	
+	$vc = new VideoClass();
+	$videoClasses = $vc->where();
 	?>
 	<div id='videoclass_options' class='panel woocommerce_options_panel hidden'>
 		<div class='options_group p-20'>
@@ -161,6 +176,14 @@ function mm_woocommerce_product_data_panels() {
 					<input type="text" style="width: 100%;" class="" id="total_video_link" placeholder="لینک ویدئو" />
 				</div>
 				<div class="col-3 mb-15">
+					<select id="total_video_class" style="width: 100%; max-height: 40px !important;" class="form-control" multiple>
+						<option disabled>کلاس ها</option>
+						<?php foreach($videoClasses as $videoClass) {?>
+						<option value="<?php echo $videoClass->id; ?>"><?php echo $videoClass->class; ?></option>
+						<?php } ?>
+					</select>
+				</div>
+				<div class="col-3 mb-15">
 					<a href="#" class="btn btn-primary btn-sm" onclick="return addGroupSessions(<?php echo $post->ID; ?>);">
 						ایجاد
 					</a>
@@ -175,6 +198,7 @@ function mm_woocommerce_product_data_panels() {
 				<div class="col text-center">ساعت پایان</div>
 				<div class="col text-center">قیمت</div>
 				<div class="col text-center">فایل</div>
+				<div class="col text-center">کلاس</div>
 				<div class="col text-center">#</div>
 			</div>
 			<hr />
@@ -193,6 +217,17 @@ function mm_woocommerce_product_data_panels() {
 				<div class="col text-center"></div>
 				<?php } ?>
 				<div class="col text-center">
+					<?php 
+					$sesses = $vc->loadBySession($register->id);
+					$vcIds = [];
+					foreach($sesses as $sess) {
+						echo $sess->class . "<br/>";
+						$vcIds[] = $sess->id;
+					} 
+					$registered[$i]->video_class = $vcIds;
+					?>
+				</div>
+				<div class="col text-center">
 					<a href="#" onclick="return startEditClass(<?php echo $i; ?>);" class="btn btn-success btn-sm my-half">
 						ویرایش
 					</a>
@@ -206,11 +241,11 @@ function mm_woocommerce_product_data_panels() {
 			<?php } ?>
 			<div class="row align-items-center mb-15">
 				<div class="col">
-				اصلاح
-				/
-				<a href="#" onclick="return startNewClass();">
-				جدید
-				</a>
+					اصلاح
+					/
+					<a href="#" onclick="return startNewClass();">
+					جدید
+					</a>
 				</div>
 				<div class="col text-center">
 					<input placeholder="نام" type="text" id="_video_class_name" style="width: 100%;" class="" />
@@ -245,6 +280,19 @@ function mm_woocommerce_product_data_panels() {
 			</div>
 			<div class="row align-items-center mb-15">
 				<div class="col-2">
+					کلاس :
+				</div>
+				<div class="col-10">
+					<select id="_video_class_video_class" style="width: 100%; max-height: 40px !important;" class="form-control" multiple>
+						<option disabled>کلاس ها</option>
+						<?php foreach($videoClasses as $videoClass) {?>
+						<option value="<?php echo $videoClass->id; ?>"><?php echo $videoClass->class; ?></option>
+						<?php } ?>
+					</select>
+				</div>
+			</div>
+			<div class="row align-items-center mb-15">
+				<div class="col-2">
 					آزمون :
 				</div>
 				<div class="col-10">
@@ -270,19 +318,19 @@ function mm_woocommerce_product_data_panels() {
 				<div class="col">
 					<div class="form-group">
 						<label for="start_pay_amount" style="margin: 0px !important;">پیش پرداخت</label>
-						<input type="number" class="form-control pays" id="start_pay_amount" name="start_pay_amount" placeholder="پیش پرداخت" value="<?php echo (isset($vp->id))?$vp->start_pay_amount:''; ?>" />
+						<input type="number" class="form-control pays" id="start_pay_amount" name="start_pay_amount" placeholder="پیش پرداخت" value="<?php echo $start_pay_amount; ?>" />
 					</div>
 				</div>
 				<div class="col">
 					<div class="form-group">
 						<label for="first_pay_amount" style="margin: 0px !important;">مبلغ قسط اول</label>
-						<input type="number" class="form-control pays" id="first_pay_amount" name="first_pay_amount" placeholder="مبلغ قسط اول" value="<?php echo (isset($vp->id))?$vp->first_pay_amount:''; ?>" />
+						<input type="number" class="form-control pays" id="first_pay_amount" name="first_pay_amount" placeholder="مبلغ قسط اول" value="<?php echo $first_pay_amount; ?>" />
 					</div>
 				</div>
 				<div class="col">
 					<div class="form-group">
 						<label for="second_pay_amount" style="margin: 0px !important;">مبلغ قسط دوم</label>
-						<input type="number" class="form-control pays" id="second_pay_amount" name="second_pay_amount" placeholder="مبلغ قسط دوم" value="<?php echo (isset($vp->id))?$vp->second_pay_amount:''; ?>" />
+						<input type="number" class="form-control pays" id="second_pay_amount" name="second_pay_amount" placeholder="مبلغ قسط دوم" value="<?php echo $second_pay_amount; ?>" />
 					</div>
 				</div>
 			</div>
@@ -296,7 +344,7 @@ function mm_woocommerce_product_data_panels() {
 				<div class="col">
 					<div class="form-group">
 						<label for="second_pay_date" style="margin: 0px !important;">تاریخ قسط دوم</label>
-						<input type="text" class="form-control pays" id="second_pay_date" name="second_pay_date" placeholder="تاریخ قسط دوم" value="<?php echo (isset($vp->id))?mm_geregorian_to_jalali($vp->second_pay_date):''; ?>" />
+						<input type="text" class="form-control pays" id="second_pay_date" name="second_pay_date" placeholder="تاریخ قسط دوم" value="<?php echo (isset($vp->id) && $vp->second_pay_date!='0000-00-00 00:00:00')?mm_geregorian_to_jalali($vp->second_pay_date):''; ?>" />
 					</div>
 				</div>
 				<div class="col">
@@ -324,6 +372,7 @@ function mm_woocommerce_product_data_panels() {
 			var data = {
 				"name": jQuery("#classname").val().trim(),
 				"video_link": jQuery("#total_video_link").val().trim(),
+				"video_class": jQuery("#total_video_class").val(),
 				"start_time": jQuery("#classstart_time").val().trim(),
 				"end_time": jQuery("#classend_time").val().trim(),
 				"from-date": jQuery("#from-date").val().trim(),
@@ -364,6 +413,7 @@ function mm_woocommerce_product_data_panels() {
 			formData.append('price', jQuery("#_video_class_price").val().trim());
 			formData.append('session_type', jQuery("#_video_class_session_type").val().trim());
 			formData.append('video_link', jQuery("#_video_class_video_link").val().trim());
+			formData.append('video_class', jQuery("#_video_class_video_class").val());
 			if(jQuery("#_video_delete_file").prop('checked')) {
 				formData.append('delete_file', '1'); 
 			}
@@ -376,8 +426,9 @@ function mm_woocommerce_product_data_panels() {
 			request.onload = function (inp) {
 				console.log(inp);
 				if (request.status == 200) {
+					console.log('Response: ', request.responseText);
 					alert('ثبت با موفقیت انجام شد');
-					jQuery("form#post").submit();
+					// jQuery("form#post").submit();
 				} else {
 					alert('خطا در ثبت');
 				}
@@ -430,6 +481,13 @@ function mm_woocommerce_product_data_panels() {
 			jQuery("#_video_class_price").val(registers[i].price);
 			jQuery("#_video_class_session_type").val(registers[i].session_type);
 			jQuery("#_video_class_video_link").val(registers[i].video_link);
+			// jQuery("#_video_class_video_class").val(registers[i].video_class);
+			jQuery("#_video_class_video_class option").prop('selected', false);
+			if(registers[i].video_class.length>0) {
+				for(var v of registers[i].video_class) {
+					jQuery("#_video_class_video_class option[value='" + v + "']").prop('selected', true);
+				}
+			}
 			return false;
 		}
 
@@ -507,18 +565,19 @@ function mm_jalali_to_geregorian($inp) {
 }
 
 function mm_geregorian_to_jalali($inp) {
-	$inp = explode(' ', $inp);
-	$inp = $inp[0];
-	$inp = explode('-', $inp);
-	if(count($inp)!=3) {
-		return null;
-	}
-	if((int)$inp[0]>(int)$inp[2]) {
-		$tmp = gregorian_to_jalali((int)$inp[0], (int)$inp[1], (int)$inp[2]);
-	}else {
-		$tmp = gregorian_to_jalali((int)$inp[2], (int)$inp[1], (int)$inp[0]);
-	}
-	return $tmp[0].'/'.$tmp[1].'/'.$tmp[2];
+	return mm_persian_to_english(jdate("Y/m/d", strtotime($inp)));
+	// $inp = explode(' ', $inp);
+	// $inp = $inp[0];
+	// $inp = explode('-', $inp);
+	// if(count($inp)!=3) {
+	// 	return null;
+	// }
+	// if((int)$inp[0]>(int)$inp[2]) {
+	// 	$tmp = jdate("Y/m/d", strtotime((int)$inp[0] . '-' . (int)$inp[1] . '-' . (int)$inp[2]));
+	// }else {
+	// 	$tmp = jdate("Y/m/d", strtotime((int)$inp[2] . '-' . (int)$inp[1] . '-' . (int)$inp[0]));
+	// }
+	// return $tmp[0].'/'.$tmp[1].'/'.$tmp[2];
 }
 
 function fixTime($inp) {
@@ -540,18 +599,15 @@ function mm_add_video_class() {
 	];
 	$fromDate = mm_jalali_to_geregorian($_REQUEST['from-date']);
 	$toDate = mm_jalali_to_geregorian($_REQUEST['to-date']);
-	// echo "From : $fromDate\n";
-	// echo "To : $toDate\n";
 	if(strtotime($toDate)<strtotime($fromDate)) {
 		die(json_encode($out, true));
 	}
 	$currentDate = $fromDate;
 	$vs = new VideoSession();
+	$vsc = new VideoSessionClass();
 	$selectedDates = [];
 	while(strtotime($currentDate)<=strtotime($toDate)) {
-		// echo $currentDate . " ";
 		$dayOfWeek = strtolower(date("l", strtotime($currentDate)));
-		// echo $dayOfWeek . "\n";
 		if(in_array($dayOfWeek, $_REQUEST['day'])) {
 			$selectedDates[] = $currentDate;
 		}
@@ -559,11 +615,12 @@ function mm_add_video_class() {
 	}
 	$ids = [];
 	$str = new convert ;
-	// echo "start adding\n";
-	// var_dump($selectedDates);
-	$vs->clear($_REQUEST['item_id']);
+	// $vs->clear($_REQUEST['item_id']);
+	// var_dump(get_class_methods($vs));
+	$startIndex = $vs->sessionCount($_REQUEST['item_id']);
+	// die('salam');
 	foreach($selectedDates as $index => $selectedDate) {
-		$t_price = $index+1 ;
+		$t_price = $startIndex+$index+1 ;
 		if($t_price!=3) {
 			$t_price_str = $str->finalcalc($t_price) . 'م';
 		}else {
@@ -579,8 +636,19 @@ function mm_add_video_class() {
 			'price'=>ceil($_REQUEST['total-price']/count($selectedDates)),
 			'video_link'=>$_REQUEST['video_link'],
 		];
-		// echo "insert\n";
-		$ids[] = $vs->insert($data);
+		$id = $vs->insert($data);
+		$videoClasses = $_REQUEST['video_class'];
+		foreach($videoClasses as $vc) {
+			$vc = (int)$vc;
+			if($vc> 0) {
+				$vsc->insert([
+					"video_class"=>$vc,
+					"session_id"=>$id,
+				]);
+			}
+		}
+
+		$ids[] = $id;
 		$out['status'] = 1;
 	}
 	
@@ -618,13 +686,28 @@ function mm_save_video_class() {
 	// var_dump($data);
 	// var_dump($_REQUEST['id']);
 	$vs = new VideoSession();
+	$vsc = new VideoSessionClass();
 	if((int)$_REQUEST['id']>0) {
 		if($vs->update($data, $_REQUEST['id'])) {
 			$data['id'] = $_REQUEST['id'];
 			$out['status'] = 1;
 			$out['data'] = $data;
 		}
+		$sql = "UPDATE #PRE#video_session_class SET deleted = 1 WHERE session_id = " . $_REQUEST['id'];
+		$vsc->query($sql);
+		$videoClasses = explode(',', $_REQUEST['video_class']);
+		foreach($videoClasses as $vc) {
+			$vc = (int)$vc;
+			if($vc> 0) {
+				$vsc->insert([
+					"session_id"=>$_REQUEST['id'],
+					"video_class"=>$vc
+				]);	
+			}
+		}
+
 	}else {
+		echo "Inserting :\n";
 		$data['id'] = $vs->insert($data);
 		$out['status'] = 1;
 		$out['data'] = $data;
@@ -665,9 +748,10 @@ function mm_add_video_pay() {
 		"second_pay_date"=>trim($_REQUEST["second_pay_date"]),
 		"second_pay_amount"=>(int)mm_persian_to_english(trim($_REQUEST["second_pay_amount"]))
 	];
-	if($data['first_pay_date']!='' && $data['second_pay_date']!='') {
+	if($data['first_pay_date']!=''/* && $data['second_pay_date']!=''*/) {
 		$data['first_pay_date'] = mm_jalali_to_geregorian($data['first_pay_date']);
-		$data['second_pay_date'] = mm_jalali_to_geregorian($data['second_pay_date']);
+		if($data['second_pay_date']!='')
+			$data['second_pay_date'] = mm_jalali_to_geregorian($data['second_pay_date']);
 		$data['id'] = $vp->insert($data);
 	}
 
@@ -690,9 +774,9 @@ function mm_woocommerce_get_item_data($cart_data, $cart_item) {
 	if(get_post_meta($product_id, '_is_video', true) == 'yes' && isset($cart_item['video_sessions'])){
 		$vs = new VideoSession();
 		$custom_items[] = array(
-				'name'      => __( 'جلسه', 'woocommerce' ),
-				'value'     => $cart_item['video_sessions'],
-				'display'   => implode(' , ',$vs->idToNames($cart_item['video_sessions']))
+			'name'      => __( 'جلسه', 'woocommerce' ),
+			'value'     => $cart_item['video_sessions'],
+			'display'   => implode(' , ',$vs->idToNames($cart_item['video_sessions']))
 		);
 	}
 	return $custom_items;
@@ -876,11 +960,34 @@ function mm_get_video_sessionPrice($video_sessions, $product_id) {
 function mm_woocommerce_add_cart_item_data($cart_item_data, $product_id, $variation_id){
 	if(get_post_meta($product_id, '_is_video', true) == 'yes'){
 		$vs = new VideoSession();
+		$vd = new VideoPayDetail;
+		$vp = new VideoPay;
 		$allSessions = $vs->loadByItemIds($product_id);
 		$handingDone = true;
+		$selectedVideoSessions = explode(',', $_POST['video_sessions']);
+		if(in_array("-1", $selectedVideoSessions)){
+			$vp = new VideoPay;
+			$vp->loadByItem($product_id);
+			$cart_item_data['warranty_price'] = $vp->start_pay_amount;
+			$current_user = wp_get_current_user();
+			$vp->loadByItem($product_id);
+			if(isset($vp->id)){
+				$vd->insertIfNot([
+					"product_id"=>$product_id,
+					"user_id"=>$current_user->ID,
+					"start_pay_amount"=>$vp->start_pay_amount,
+					"first_pay_date"=>$vp->first_pay_date,
+					"first_pay_amount"=>$vp->first_pay_amount,
+					"second_pay_date"=>$vp->second_pay_date,
+					"second_pay_amount"=>$vp->second_pay_amount
+				]);	
+			}
+			return $cart_item_data;
+		}
+		// var_dump($selectedVideoSessions);
 		foreach($allSessions as $sessionId)
 		{
-			if(!in_array("$sessionId", explode(',', $_POST['video_sessions']))){
+			if(!in_array("$sessionId", $selectedVideoSessions)){
 				$handingDone = false;
 			}
 		}
@@ -901,7 +1008,7 @@ function fixVideoSessions($inp) {
 	$tmp = explode(",", $inp);
 	$out = [];
 	foreach($tmp as $vsid) {
-		if((int)$vsid>0) {
+		if((int)$vsid!=0) {
 			$out[] = (int)$vsid;
 		}
 	}
@@ -1000,11 +1107,44 @@ function _mm_woocommerce_thankyou() {
 }
 
 function mm_woocommerce_thankyou($order_id) {
+	global $SKYROOM_ENABLED;
+    global $SKYROOM_APIKEY;
+    global $SKYROOM_BASEURL;
+
+    if(isset($SKYROOM_ENABLED) && $SKYROOM_ENABLED){
+		$order = wc_get_order( $order_id );
+		$orderItems = $order->get_items();
+		$vu = new VideoUser;
+		$vs = new VideoSession;
+		$skyroom = new SkyRoom($SKYROOM_APIKEY, $SKYROOM_BASEURL);
+		foreach($orderItems as $orderItem) {
+			$product_id = version_compare( WC_VERSION, '3.0', '<' ) ? $orderItem['product_id'] : $orderItem->get_product_id();
+			$custom_field = get_post_meta( $product_id, '_is_video', true);
+			if($custom_field=='yes') {
+				$vu->addUser();
+				$data = $orderItem->get_formatted_meta_data();
+				$video_sessions = [];
+				foreach($data as $meta) {
+					if($meta->key == 'video_sessions') {
+						$video_sessions = explode(',', $meta->value);
+					}
+				}
+				if(count($video_sessions)==0) {
+					$videoSessions = $vs->loadByItem($product_id);
+				}else {
+					$videoSessions = $vs->loadByIds($video_sessions);
+				}
+				foreach($videoSessions as $videoSession) {
+					$skyroom->addUserToRoom($vu->principal_id, [["user_id" => $videoSession->sco_id]]);
+				}
+			}
+		}
+    }
+	/*
 	$order = wc_get_order( $order_id );
 	$orderItems = $order->get_items();
 	$vu = new VideoUser;
 	$vs = new VideoSession;
-	/*
 	$adobeConnect = new AdobeConnect("saied.banuie@gmail.com", "Banuie@159951");
 	foreach($orderItems as $orderItem) {
 		$product_id = version_compare( WC_VERSION, '3.0', '<' ) ? $orderItem['product_id'] : $orderItem->get_product_id();
@@ -1029,6 +1169,39 @@ function mm_woocommerce_thankyou($order_id) {
 		}
 	}
 	*/
+
+
+
+
+	$vd = new VideoPayDetail;
+	$vp = new VideoPay;
+	$order = wc_get_order( $order_id );
+	$orderItems = $order->get_items();
+	foreach($orderItems as $orderItem) {
+		$product_id = version_compare( WC_VERSION, '3.0', '<' ) ? $orderItem['product_id'] : $orderItem->get_product_id();
+		$custom_field = get_post_meta( $product_id, '_is_video', true);
+		if($custom_field=='yes') {
+			$data = $orderItem->get_formatted_meta_data();
+			$video_sessions = [];
+			foreach($data as $meta) {
+				if($meta->key == 'video_sessions') {
+					$video_sessions = explode(',', $meta->value);
+				}
+			}
+			if(count($video_sessions)==0) {
+				$current_user = wp_get_current_user();
+				$vd->loadByProductAndUser($product_id, $current_user->ID);
+				if(isset($vd->id)){
+					$vd->update([
+						"order_id"=>$order_id,
+						// "first_pay_date_done"=>date('Y-m-d H:i:s'),
+						"status"=>"checkedout"
+					]);
+				}
+			}
+
+		}
+	}
 	?>
 	<style>
 		.woocommerce-order-details {
@@ -1200,13 +1373,114 @@ function getVideoClasses( $product_id, $order_status = ['wc-completed','wc-proce
 
 function mm_woocommerce_after_add_to_cart_button(){
 	$product_id = get_the_ID();
-	
+	$vp = new VideoPay();
+	$vp->loadByItem($product_id);
 	$vs = new VideoSession();
 	$sessions= getVideoClasses($product_id);
 	$sessionDatas = $vs->idToNames($sessions);
 	if(get_post_meta($product_id, '_is_video', true) == 'yes'){
 		?>
+	<?php if(isset($vp->id)){ ?>
+	<script>
+		jQuery(document).ready(function(){
+			jQuery('button[name="add-to-cart"]').each(function(id, field) {
+				if(jQuery(field).text() == 'افزودن به سبد خرید'){
+					jQuery(field).text('خرید کامل دوره');
+				}
+				// console.log(jQuery(field).text());
+			});
+		});
+	</script>
+	&nbsp;
+	<button onclick="jQuery('#pay-modal').modal('show');" type="button" name="add-to-cart" value="11181" class="single_add_to_cart_button button alt">
+		خرید اقساطی
+	</button>
+	<?php } ?>
 	<div class='video_sessions'>
+		<?php if(isset($vp->id)){ ?>
+		<div class="modal" tabindex="-1" id="pay-modal" role="dialog">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">خرید اقساطی</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p>جزئیات خرید اقساطی:</p>
+						<div>
+							<table class="table table-bordered table-gray table-hover">
+								<thead>
+									<tr>
+										<th>
+										#
+										</th>
+										<th>
+										مبلغ
+										</th>
+										<th>
+										تاریخ سر رسید
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+										پیش پرداخت : 
+										</td>
+										<td>
+										<?php echo number_format($vp->start_pay_amount); ?>
+										</td>
+										<td>
+											هم اکنون
+										</td>
+									</tr>
+									<tr>
+										<td>
+										قسط اول: 
+										</td>
+										<td>
+										<?php echo number_format($vp->first_pay_amount); ?>
+										</td>
+										<td>
+											<?php echo jdate("Y/m/d", strtotime($vp->first_pay_date));  ?>
+										</td>
+									</tr>
+									<?php if( (int)$vp->second_pay_amount > 0 ):?>
+									<tr>
+										<td>
+										قسط دوم: 
+										</td>
+										<td>
+										<?php echo number_format($vp->second_pay_amount)  ?>
+										</td>
+										<td>
+											<?php echo jdate("Y/m/d", strtotime($vp->second_pay_date));  ?>
+										</td>
+									</tr>
+									<?php endif; ?>
+								</tbody>
+							</table>
+							<h4>
+								جمع پرداختی : <?php echo number_format((int) $vp->start_pay_amount +(int)$vp->first_pay_amount+(int)$vp->second_pay_amount); ?>
+							</h4>
+							<sub>
+								(
+								در حالت اقساطی میزان ۱۰ درصد  به قیمت نقدی اضافه  میگردد
+								)
+							</sub>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button onclick="jQuery('#main_video_sessions').val('-1');" type="submit" name="add-to-cart" value="<?php echo $product_id; ?>" class="single_add_to_cart_button button alt btn btn-primary">تایید</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">انصراف</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<?php } ?>
 		<span>
 			جلسات خریداری شده تا کنون:
 		</span>
@@ -1236,6 +1510,8 @@ function mm_woocommerce_add_to_cart_validation( $passed, $product_id, $quantity,
 	global $woocommerce;
 	$vs = new VideoSession;
 	$vu = new VideoUser;
+	$vp = new VideoPay;
+	$isPay = false;
 	$myClassSessions = $vs->loadMyClassSessions();
 	$items = $woocommerce->cart->get_cart();
 	if(get_post_meta($product_id, '_is_video', true) == 'yes'){
@@ -1243,10 +1519,18 @@ function mm_woocommerce_add_to_cart_validation( $passed, $product_id, $quantity,
 		// echo $product_id."<br/>";
 		// var_dump($myClassSessions);
 		// die();
+		$svideoSessions = explode(',', $_REQUEST['video_sessions']);
+		if(array_search('-1', $svideoSessions)!==false){
+			$isPay = true;
+		}
 		foreach($myClassSessions as $_product_id=>$selectedSessions) {
 			if($_product_id == $product_id){
 				// die('a');
-				$newSessions = explode(',', $_REQUEST['video_sessions']);
+				// if($isPay){
+				// 	wc_add_notice( __( 'جلسه یا جلساتی از این کلاس قبلا خرید شده است امکان خرید اقساط نیست', 'textdomain' ), 'error' );
+				// 	return false;
+				// }
+				$newSessions = $svideoSessions;
 				for($i=0;$i<count($newSessions);$i++){
 					if($newSessions[$i]==""){
 						unset($newSessions[$i]);
@@ -1317,11 +1601,11 @@ function mm_woocommerce_add_to_cart_validation( $passed, $product_id, $quantity,
 			$_product_id = $values['data']->get_id();
 			if($_product_id == $product_id){
 				$selectedSessions = isset($values['video_sessions'])? $values['video_sessions']: null;
-				if($selectedSessions==null) {
-					wc_add_notice( __( 'این کلاس قبلا بطور کامل ثبت نام شده است', 'textdomain' ), 'error' );
+				if($selectedSessions==null || $isPay) {
+					wc_add_notice( __( 'این کلاس قبلا بطور کامل به سبد افزوده شده است', 'textdomain' ), 'error' );
 					return false;
 				}
-				$newSessions = explode(',', $_REQUEST['video_sessions']);
+				$newSessions = $svideoSessions;
 				$new = false;
 				foreach($newSessions as $newSession) {
 					if(!in_array($newSession, $selectedSessions)) {

@@ -1,5 +1,10 @@
 <?php
 class VideoSession extends MyModel {
+  public function sessionCount($item_id){
+    $results = $this->where("item_id = {$item_id}");
+    return count($results);
+  }
+
   public function __construct($id=null) {
     parent::__construct('video_session', $id);
   }
@@ -440,6 +445,17 @@ class VideoSession extends MyModel {
     // $adobeConnect = new AdobeConnect("saied.banuie@gmail.com", "Banuie@159951");
     // $sessionPath = uniqid('aref-');
     $data['name'] = str_replace('ی', 'ي', $data['name']);
+    global $SKYROOM_ENABLED;
+    global $SKYROOM_APIKEY;
+    global $SKYROOM_BASEURL;
+
+    if(isset($SKYROOM_ENABLED) && $SKYROOM_ENABLED){
+      $skyroom = new SkyRoom($SKYROOM_APIKEY, $SKYROOM_BASEURL);
+      $result = $skyroom->createRoom($data['name'], $data['name'], 60);
+      if($result['ok']){
+        $data['sco_id'] = "" . $result['result'] . "";
+      }
+    }
     // $sco_id = $adobeConnect->createMeeting($data['name'], $sessionPath);
     // if(isset($sco_id['sco-id'])) {
       // $sco_id = $sco_id['sco-id'];
@@ -448,6 +464,8 @@ class VideoSession extends MyModel {
     // }
     // $data['sco_id'] = $sco_id;
     // $data['adobe_path'] = $sessionPath;
+    // var_dump($data);
+    // die();
     return parent::insert($data);
   }
 
