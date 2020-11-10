@@ -240,16 +240,18 @@ function mm_woocommerce_product_data_panels() {
 			<hr />
 			<?php } ?>
 			<div class="row align-items-center mb-15">
-				<div class="col">
+				<div class="col-2">
 					اصلاح
 					/
 					<a href="#" onclick="return startNewClass();">
 					جدید
 					</a>
 				</div>
-				<div class="col text-center">
+				<div class="col-10 text-center">
 					<input placeholder="نام" type="text" id="_video_class_name" style="width: 100%;" class="" />
 				</div>
+			</div>
+			<div class="row align-items-center mb-15">
 				<div class="col text-center">
 					<input placeholder="تاریخ" type="text" id="_video_class_start_date" style="width: 100%;" class="" />
 				</div>
