@@ -205,7 +205,7 @@ function mm_woocommerce_product_data_panels() {
 			<?php foreach($registered as $i => $register) { ?>
 			<?php $register->start_date = jdate("Y/m/d", strtotime($register->start_date), '', 'Asia/Tehran', 'fa'); ?>
 			<div class="row">
-				<div class="col text-center"><?php echo $i+1; ?></div>
+				<div class="col text-center"><?php echo $i+1; echo '<br/>'.($register->show_in_site=='no' ? '<span style="color:red" >پنهان</span>':'');  ?></div>
 				<div class="col text-center"><?php echo $register->name; ?></div>
 				<div class="col text-center"><?php echo $register->start_date; ?></div>
 				<div class="col text-center"><?php echo $register->start_time; ?></div>
@@ -301,10 +301,13 @@ function mm_woocommerce_product_data_panels() {
 					<input id="_video_class_file_path" class="" type="file" />
 					حذف شود؟
 					<input id="_video_delete_file" type="checkbox" />
+					عدم نمایش در سایت
+					<input id="_video_show_in_site" type="checkbox" />
 				</div>
 				<div class="col-12 text-left">
-					<a onclick="editClass(<?php echo $post->ID; ?>);"
-						class="btn btn-success btn-sm mt-15 text-white">ثبت</a>
+					<a onclick="editClass(<?php echo $post->ID; ?>,this);"
+							class="btn btn-success btn-sm mt-15 text-white"
+							id="hs_save_video_session" >ثبت</a>
 				</div>
 			</div>
 		</div>
@@ -400,11 +403,13 @@ function mm_woocommerce_product_data_panels() {
 			return false;
 		}
 
-		function editClass(itemId) {
+		function editClass(itemId,inp) {
 			// if (selectedId <= 0) {
 			// 	alert('لطفا یک جلسه را برای اصلاح انتخاب کنید');
 			// 	return false;
 			// }
+			jQuery(inp).prop("disabled",true);
+			jQuery(inp).text('صبر کنید ...');
 			var formData = new FormData();
 			formData.append('id', selectedId);
 			formData.append('item_id', itemId);
@@ -419,6 +424,9 @@ function mm_woocommerce_product_data_panels() {
 			if(jQuery("#_video_delete_file").prop('checked')) {
 				formData.append('delete_file', '1'); 
 			}
+			if(jQuery("#_video_show_in_site").prop('checked')) {
+				formData.append('show_in_site', '1'); 
+			}
 			formData.append('action', "mm_save_video_class");
 			if (jQuery("#_video_class_file_path")[0].files[0]) {
 				formData.append('file_path', jQuery("#_video_class_file_path")[0].files[0]);
@@ -428,9 +436,13 @@ function mm_woocommerce_product_data_panels() {
 			request.onload = function (inp) {
 				console.log(inp);
 				if (request.status == 200) {
-					console.log('Response: ', request.responseText);
-					alert('ثبت با موفقیت انجام شد');
-					// jQuery("form#post").submit();
+					jQuery("#hs_save_video_session").prop("disabled",false);
+					jQuery("#hs_save_video_session").removeProp("disabled");
+					jQuery("#hs_save_video_session").text('ثبت');
+					jQuery("#hs_save_video_session").after("<span class='alert alert-success' id='hs_after_save'  >ثبت با موفقیت انجام شد</span>");
+					setTimeout(()=>{
+					 	jQuery("#hs_after_save").remove();
+					},5000);
 				} else {
 					alert('خطا در ثبت');
 				}
@@ -490,6 +502,9 @@ function mm_woocommerce_product_data_panels() {
 					jQuery("#_video_class_video_class option[value='" + v + "']").prop('selected', true);
 				}
 			}
+			jQuery('html, body').animate({
+				scrollTop: jQuery("#_video_class_name").offset().top-150
+			}, 500);
 			return false;
 		}
 
@@ -669,10 +684,14 @@ function mm_save_video_class() {
 		'price'=>(int)$_REQUEST['price'],
 		'session_type'=>$_REQUEST['session_type'],
 		'video_link'=>$_REQUEST['video_link'],
+		'show_in_site' => 'yes'
 	];
 	// var_dump($_POST);
 	if(isset($_POST['delete_file'])) {
 		$data['file_path'] = null;
+	}
+	if(isset($_POST['show_in_site'])) {
+		$data['show_in_site'] = 'no';
 	}
 	if($_FILES['file_path']) {
 		$fileName = strtotime(date("Y-m-d H:i:s")) . '.pdf';
@@ -813,7 +832,11 @@ function mm_woocommerce_before_add_to_cart_button() {
 		انتخاب <a href="#" onclick="mm_selectAll();return false;">همه</a> یا <a href="#"
 			onclick="mm_unSelectAll();return false;">هیچ</a>
 		<?php foreach ($sessions as $session) { ?>
-		<div class="mm-session-selection row">
+		<?php if($session->show_in_site == 'yes'){?>
+		<div class="mm-session-selection row" >
+		<?php }else{?>
+		<div class="mm-session-selection row d-none" >	
+		<?php } ?>
 			<input style="display: none;" type="checkbox" class="_video_sessions" name="video_sessions[]"
 				id="_video_session_<?php echo $session->id; ?>" value="<?php echo $session->id; ?>"
 				data-price="<?php echo $session->price; ?>" />
