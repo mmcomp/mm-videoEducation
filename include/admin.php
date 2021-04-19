@@ -824,6 +824,13 @@ function mm_woocommerce_before_add_to_cart_button() {
 	$id = get_the_ID();
 	$vs = new VideoSession();
 	$sessions = $vs->loadByItem($id);
+	$myClassSessions = $vs->loadMyClassSessions();
+	$buyedSessions = [];
+	foreach($myClassSessions as $product_id => $psessions) {
+		foreach($psessions as $ps) {
+			$buyedSessions[] = $ps;
+		}
+	}
 	$img = get_the_post_thumbnail($id, 'thumbnail', array( 'class' => 'alignright' ));
 
 	if (get_post_meta($id, '_is_video', true) == 'yes') { ?>
@@ -863,6 +870,9 @@ function mm_woocommerce_before_add_to_cart_button() {
 
 			</div>
 			<div class="col">
+				<?php if(in_array($session->id, $buyedSessions)) { ?>
+				قبلا خریداری شده
+				<?php } else { ?>
 				<form class="cart" action="" method="post" enctype="multipart/form-data">
 					<input name="video_sessions" type="hidden" value="<?php echo $session->id; ?>">
 					<input name="quantity" type="hidden" value="1" >
@@ -874,6 +884,7 @@ function mm_woocommerce_before_add_to_cart_button() {
 						<?php } ?>
 					</button>
 				</form>
+				<?php } ?>
 			</div>
 		</div>
 		<?php } ?>
@@ -1548,7 +1559,7 @@ function mm_woocommerce_add_to_cart_validation( $passed, $product_id, $quantity,
 		if(array_search('-1', $svideoSessions)!==false){
 			$isPay = true;
 		}
-		foreach($myClassSessions as $_product_id=>$selectedSessions) {
+		foreach($myClassSessions as $_product_id=>$buyedSessions) {
 			if($_product_id == $product_id){
 				// die('a');
 				// if($isPay){
@@ -1561,19 +1572,20 @@ function mm_woocommerce_add_to_cart_validation( $passed, $product_id, $quantity,
 						unset($newSessions[$i]);
 					}
 				}
-				if(!isset($selectedSessions[0]) || $selectedSessions[0]=="") {
+				if(!isset($buyedSessions[0]) || $buyedSessions[0]=="") {
 					wc_add_notice( __( 'این کلاس قبلا بطور کامل خرید شده است', 'textdomain' ), 'error' );
 					return false;
 				}
-
+				$selectedSessions = [];
 				$new = false;
 				foreach($newSessions as $newSession) {
-					if(!in_array($newSession, $selectedSessions)) {
+					if(!in_array($newSession, $buyedSessions)) {
 						$selectedSessions[] = $newSession;
 						$new = true;
 					}
 				}
-
+				// var_dump($selectedSessions);
+				// return false;
 				if(!$new) {
 					wc_add_notice( __( 'جلسه های مربوطه در این کلاس قبلا خرید شده اند.', 'textdomain' ), 'error' );
 					return false;
@@ -1595,6 +1607,11 @@ function mm_woocommerce_add_to_cart_validation( $passed, $product_id, $quantity,
 
 				foreach($cart as $cart_item_id=>$cart_item) {
 					if($cart_item['product_id']==$product_id /*&& isset($cart_item['video_sessions']) */&& !$new) {
+						if($cart_item['video_sessions'] && is_array($cart_item['video_sessions']))
+							foreach($cart_item['video_sessions'] as $vsid)
+								if(!in_array($vsid, $selectedSessions))
+									$selectedSessions[] = $vsid;
+						
 						$cart_item['video_sessions'] = $selectedSessions;
 						$cart_item['warranty_price'] = mm_get_video_sessionPrice($selectedSessions, $product_id);
 						WC()->cart->cart_contents[$cart_item_id] = $cart_item;
