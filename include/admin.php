@@ -694,9 +694,9 @@ function mm_save_video_class() {
 		$data['show_in_site'] = 'no';
 	}
 	if($_FILES['file_path']) {
-		$extension = explode(".", $_FILES["file_path"]["tmp_name"]);
-		$extension = $extension[count($extension) - 1];
-		$fileName = strtotime(date("Y-m-d H:i:s")) . '.' . $extension;
+		$path = $_FILES['file_path']['name'];
+		$ext = pathinfo($path, PATHINFO_EXTENSION);
+		$fileName = strtotime(date("Y-m-d H:i:s")) . '.' . $ext;
 		if(move_uploaded_file($_FILES["file_path"]["tmp_name"], wp_get_upload_dir()['path'] . $fileName)) {
 			$data['file_path'] = wp_get_upload_dir()['url'] . $fileName;
 		}
