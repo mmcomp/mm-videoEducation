@@ -694,7 +694,9 @@ function mm_save_video_class() {
 		$data['show_in_site'] = 'no';
 	}
 	if($_FILES['file_path']) {
-		$fileName = strtotime(date("Y-m-d H:i:s")) . '.pdf';
+		$extension = explode(".", $_FILES["file_path"]["tmp_name"]);
+		$extension = $extension[count($extension) - 1];
+		$fileName = strtotime(date("Y-m-d H:i:s")) . '.' . $extension;
 		if(move_uploaded_file($_FILES["file_path"]["tmp_name"], wp_get_upload_dir()['path'] . $fileName)) {
 			$data['file_path'] = wp_get_upload_dir()['url'] . $fileName;
 		}
